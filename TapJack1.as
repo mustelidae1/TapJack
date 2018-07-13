@@ -82,11 +82,18 @@
 			if (currentCard != null && currentCard.getValue() == 11 && animationInProgress == false) { 
 				var deckSize:int = deck.getLength(); 
 				var cardsMoved:int = 0; 
+				var curWidth:int; 
 				if (event.target == p1Tap) {
-					p1Progress.width += progressWidth * deckSize;
+					p1Progress.alpha = 100; 
+					//p1Progress.width += progressWidth * deckSize;
+					curWidth = p1Progress.width; 
+					TweenLite.to(p1Progress, 1, {width: curWidth + (progressWidth * deckSize)}); 
 				} else if (event.target == p2Tap) {
+					p2Progress.alpha = 100; 
 					p2Progress.width += progressWidth * deckSize; 
-					p2Progress.x = stage.stageWidth - p2Progress.width; 
+					//p2Progress.x = stage.stageWidth - p2Progress.width; 
+					curWidth = p2Progress.width; 
+					TweenLite.to(p2Progress, 1, {x: (stage.stageWidth - curWidth)}); 
 				}
 				for (var i:int = 0; i < deckSize; i++) {
 					cardsMoved++; 
@@ -138,13 +145,14 @@
 				// Check if this is player1's last card (player2 wins) 
 				if (player1Turn == true && player1Deck.getLength() == 0) {
 					//trace("Player 2 wins!"); 
+					p1Progress.alpha = 0; 
 					if (currentCard.getValue() == 11) {
 // TODO: Is the order that cards are added to the deck good? 
 // cause there will always be a jack at the bottom after you get one
 						trace("Last Jack!"); 
+						p1Deck.alpha = 0; 
 						yourTurn(1); // keep turn on player 1 so someone must take the jack 
 					} else {
-						p1Progress.alpha = 0; 
 						winner(2);
 					}
 				} else {
@@ -196,12 +204,13 @@
 				// Check if this is player2's last card (player1 wins) 
 				if (player1Turn == false && player2Deck.getLength() == 0) {
 					//trace("Player 1 wins!"); 
+					p2Progress.alpha = 0; 
 					if (currentCard.getValue() == 11) {
 						trace("Last jack!"); 
+						p2Deck.alpha = 0; 
 						yourTurn(2); // keep turn on player 2 so someone must take the jack 
 						// TODO: get deck to go away 
 					} else {
-						p2Progress.alpha = 0; 
 						winner(1); 
 					}
 				} else {
@@ -310,6 +319,16 @@
 			}
 		}
 		
+		function makeVisible(player:int) {
+			if (player == 1) {
+				p1Deck.alpha = 100; 
+				p1Progress.alpha = 100; 
+ 			} else {
+				p2Deck.alpha = 100; 
+				p2Progress.alpha = 100; 
+			}
+		}
+		
 		/*
 		*  Destroys all instances of cards displayed onscreen and adds those cards to 
 		*  the respective player's deck. 
@@ -317,7 +336,7 @@
 		function destroyEverything(deckSize:int, cardsMoved:int, player:int) {
 			//trace("EXTERMINATE"); 
 			//trace(deckSize, cardsMoved); 
-			
+			makeVisible(player); 
 			if (deckSize == cardsMoved) {
 				for (var j:int; j < deckSize; j++) {
 					if (deck.getCardAt(0) != null) {
