@@ -10,18 +10,18 @@
 	import TapJack1; 
 	
 	/*
-	* Driver class for TapJack. 
-	* @author Olivia Thomas 
-	*/ 
+	 * Driver class for TapJack. 
+	 * @author Olivia Thomas 
+	 */ 
 	public class TapJackDoc extends MovieClip {
 
 		var playButton:MovieClip = new PlayButton(); 
-		var instructionsButton:MovieClip = new InstructionsButton(); 
+		var instructionsButton:MovieClip = new HelpButton(); 
 		var game:TapJack1; 
 		
 		/*
-		*  Main method. 
-		*/ 
+	 	 *  Main method. 
+		 */ 
 		public function TapJackDoc() {
 			
 			Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
@@ -33,8 +33,8 @@
 		}
 		
 		/*
-		* Displays the menu. 
-		*/ 
+		 * Displays the menu. 
+		 */ 
 		public function displayMenu() :void {
 			addChild(playButton); 
 			playButton.x = stage.stageWidth / 2; 
@@ -43,20 +43,20 @@
 			
 			addChild(instructionsButton); 
 			instructionsButton.x = stage.stageWidth / 2; 
-			instructionsButton.y = stage.stageHeight / 3; 
+			instructionsButton.y = stage.stageHeight - instructionsButton.height; 
 			instructionsButton.addEventListener(TouchEvent.TOUCH_BEGIN, instructions); 
 		}
 		
 		/*
-		* Displays the instructions. 
-		*/ 
+		 * Displays the instructions. 
+		 */ 
 		public function instructions(event:TouchEvent) :void {
 			
 		}
-		
+		 
 		/*
-		* Initializes a new game. 
-		*/ 
+		 * Initializes a new game. 
+		 */ 
 		public function playGame(event:TouchEvent) :void {
 			playButton.removeEventListener(TouchEvent.TOUCH_BEGIN, playGame); 
 			removeChild(playButton); 
@@ -68,8 +68,8 @@
 		}
 		
 		/*
-		* Ends the current game. 
-		*/ 
+		 * Ends the current game. 
+		 */ 
 		public function endGame() :void {
 			game.clear(); 
 			removeChild(game); 
@@ -77,8 +77,8 @@
 		}
 		
 		/*
-		* Ends the current game and starts a new one. 
-		*/ 
+		 * Ends the current game and starts a new one. 
+		 */ 
 		public function rematch() :void {
 			game.clear(); 
 			removeChild(game); 
@@ -87,8 +87,8 @@
 		}
 		
 		/*
-		* Update function - handles jack delay timer. 
-		*/ 
+		 * Update function - handles jack delay timer. 
+		 */ 
 		public function update(e:Event) :void {
 			if (game != null) {
 				game.jackTimer++; 

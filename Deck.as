@@ -24,11 +24,13 @@
 		}
 		
 		public function removeCard() :Card {
-			return deck.shift(); 
+			return deck.pop(); // removes last card 
 		}
 		
+		// remove card from end? 
+		
 		public function addCard(card:Card) :void {
-			deck.push(card); 
+			deck.push(card); // adds card to end 
 		}
 		
 		public function getLength() :Number {
