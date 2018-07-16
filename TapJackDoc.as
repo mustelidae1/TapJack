@@ -6,6 +6,8 @@
 	import flash.ui.Multitouch; 
 	import flash.ui.MultitouchInputMode;
 	import flash.events.TouchEvent;	
+
+	import AnimationManager; 
 	
 	import TapJack1; 
 	
@@ -39,7 +41,7 @@
 			addChild(playButton); 
 			playButton.x = stage.stageWidth / 2; 
 			playButton.y = stage.stageHeight / 2; 
-			playButton.addEventListener(TouchEvent.TOUCH_BEGIN, playGame); 
+			playButton.addEventListener(TouchEvent.TOUCH_BEGIN, playPressed); 
 			
 			addChild(instructionsButton); 
 			instructionsButton.x = stage.stageWidth / 2; 
@@ -55,14 +57,23 @@
 		}
 		 
 		/*
+		 * Called when the play button is pressed; initiates animations 
+		 */ 
+		public function playPressed(event:TouchEvent) :void {
+			playButton.removeEventListener(TouchEvent.TOUCH_BEGIN, playGame); 
+			instructionsButton.removeEventListener(TouchEvent.TOUCH_BEGIN, instructions); 
+			AnimationManager.ZoomOut(instructionsButton);
+			
+			AnimationManager.MoveCardHorizontal(playButton, stage.stageWidth + playButton.width, function(){playGame()}); 
+			
+		}
+		
+		/*
 		 * Initializes a new game. 
 		 */ 
-		public function playGame(event:TouchEvent) :void {
-			playButton.removeEventListener(TouchEvent.TOUCH_BEGIN, playGame); 
+		private function playGame() :void {
 			removeChild(playButton); 
-			playButton.removeEventListener(TouchEvent.TOUCH_BEGIN, instructions); 
 			removeChild(instructionsButton); 
-			
 			game = new TapJack1(this); 
 			addChild(game); 
 		}

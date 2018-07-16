@@ -361,26 +361,30 @@
 			
 			touchLayer.addChild(p1Deck); 
 			p1Deck.x = stage.stageWidth / 2; 
-			p1Deck.y = stage.stageHeight; 
+			p1Deck.y = stage.stageHeight - 50;
+			AnimationManager.layCardUp(p1Deck); 
 			p1Deck.addEventListener(TouchEvent.TOUCH_BEGIN, player1);
 			
 			touchLayer.addChild(p2Deck); 
 			p2Deck.x = stage.stageWidth / 2; 
-			p2Deck.y = 0; 
+			p2Deck.y = 0 + 50;
+			AnimationManager.layCardDown(p2Deck); 
 			p2Deck.addEventListener(TouchEvent.TOUCH_TAP, player2); 
 			//trace("setup complete"); 
 			
 			touchLayer.addChild(p1Progress); 
 			p1Progress.x = 0; 
 			p1Progress.y = stage.stageHeight - p1Progress.height; 
-			p1Progress.width = stage.stageWidth / 2; 
+			p1Progress.width = 0; 
+			AnimationManager.IncreaseWidth(p1Progress, stage.stageWidth / 2); 
 			
 			touchLayer.addChild(p2Progress); 
-			p2Progress.width = stage.stageWidth / 2; 
+			p2Progress.width = 0; 
+			AnimationManager.IncreaseWidth(p2Progress, stage.stageWidth / 2); 
 			p2Progress.x = stage.stageWidth;
 			p2Progress.y = 0;
 			
-			progressWidth = p1Progress.width / 26;
+			progressWidth = (stage.stageWidth / 2) / 26;
 			
 			touchLayer.addChild(p1Tap);  
 			p1Tap.width = stage.stageWidth; 
