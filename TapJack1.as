@@ -7,10 +7,7 @@
 	import flash.ui.MultitouchInputMode;
 	import flash.events.TouchEvent;	
 	
-	import com.greensock.*; 
-	import com.greensock.easing.*;
-	import fl.transitions.TweenEvent; 
-	import fl.transitions.Tween; 
+	import AnimationManager; 
 	
 	import Card; 
 	import Deck; 
@@ -36,11 +33,9 @@
 		private var winText:MovieClip = new WinText(); 
 		private var p1Text = new Player1Text(); 
 		private var p2Text = new Player2Text(); 
-		private var tap = new Tap(); 
-		private var miniMen1 = new MiniMenuButton(); 
-		private var miniMen2 = new MiniMenuButton(); 
 		private var menuButton = new MenuButton(); 
 		private var rematchButton = new RematchButton(); 
+		private var helpButton = new HelpButton(); 
 		
 		private var touchLayer:Sprite = new Sprite();   // container object for all interactable objects (above) 
 		private var cardsLayer:Sprite = new Sprite();   // container object for all non-interactable objects (below) 
@@ -85,24 +80,21 @@
 				var curWidth:int; 
 				if (event.target == p1Tap) {
 					p1Progress.alpha = 100; 
-					//p1Progress.width += progressWidth * deckSize;
 					curWidth = p1Progress.width; 
-					TweenLite.to(p1Progress, 1, {width: curWidth + (progressWidth * deckSize)}); 
+					AnimationManager.IncreaseWidth(p1Progress, curWidth + (progressWidth * deckSize)); 
 				} else if (event.target == p2Tap) {
 					p2Progress.alpha = 100; 
-					p2Progress.width += progressWidth * deckSize; 
-					//p2Progress.x = stage.stageWidth - p2Progress.width; 
 					curWidth = p2Progress.width; 
-					TweenLite.to(p2Progress, 1, {x: (stage.stageWidth - curWidth)}); 
+					AnimationManager.IncreaseWidth(p2Progress, curWidth + (progressWidth * deckSize)); 
 				}
 				for (var i:int = 0; i < deckSize; i++) {
 					cardsMoved++; 
 					if (deck.getCardAt(i) != null && deck.getCardAt(i).getCardMC().stage) {
 						animationInProgress = true; 
 						if (event.target == p1Tap) {
-							TweenLite.to(deck.getCardAt(i).getCardMC(), 1, {x:"0", y:stage.stageHeight, onComplete:function(){destroyEverything(deckSize, cardsMoved, 1)}}); 
+							AnimationManager.moveCard(deck.getCardAt(i).getCardMC(), stage.stageHeight, function(){destroyEverything(deckSize, cardsMoved, 1)}); 
 						} else if (event.target == p2Tap) {
-							TweenLite.to(deck.getCardAt(i).getCardMC(), 1, {x:"0", y:0, onComplete:function(){destroyEverything(deckSize, cardsMoved, 2)}});
+							AnimationManager.moveCard(deck.getCardAt(i).getCardMC(), 0, function(){destroyEverything(deckSize, cardsMoved, 2)}); 
 						}
 					} 
 					 
@@ -116,9 +108,6 @@
 		* if player 1 has lost. 
 		*/ 
 		function player1(event: TouchEvent) :void {
-			//trace("Player 1!"); 
-			//player1Deck.print(); 
-			//trace("********"); 
 			if (player1Turn == true && player1Deck.getLength() > 0 && animationInProgress == false && jackTimer > JACK_DELAY) {
 				if (player1Deck.getCardAt(0) == null) {
 					trace("Error: Null Card"); 
@@ -131,13 +120,9 @@
 				cardPlayed.x = stage.stageWidth / 2; 
 				cardPlayed.y = (stage.stageHeight / 2) + 50; 
 				cardPlayed.rotation = Math.random() * 5;
-				TweenLite.to(cardPlayed, 1, {y:"-=50"});
+				AnimationManager.layCardDown(cardPlayed);  
 				p1Progress.width -= progressWidth; 
 				removeCard(); 
-				addEventListener(TouchEvent.TOUCH_END, player1EndTouch); 
-				//touchLayer.addChild(tap);
-				//tap.x = event.stageX; 
-				//tap.y = event.stageY; 
 				// If this is a jack, set delay timer
 				if (currentCard.getValue() == 11) {
 					jackTimer = 0; 
@@ -147,8 +132,6 @@
 					//trace("Player 2 wins!"); 
 					p1Progress.alpha = 0; 
 					if (currentCard.getValue() == 11) {
-// TODO: Is the order that cards are added to the deck good? 
-// cause there will always be a jack at the bottom after you get one
 						trace("Last Jack!"); 
 						p1Deck.alpha = 0; 
 						yourTurn(1); // keep turn on player 1 so someone must take the jack 
@@ -164,19 +147,12 @@
 			
 		}
 		
-		function player1EndTouch(event: TouchEvent) :void {
-			//touchLayer.removeChild(tap); 
-		}
-		
 		/* 
-		* Called when player 2 lays down a card. 
-		* Moves the card to the deck and determines 
-		* if player 2 has lost. 
-		*/ 
+		 * Called when player 2 lays down a card. 
+		 * Moves the card to the deck and determines 
+		 * if player 2 has lost. 
+		 */ 
 		function player2(event: TouchEvent) :void {
-			//trace("Player 2!"); 
-			//player2Deck.print(); 
-			//trace("********"); 
 			if (player1Turn == false && player2Deck.getLength() > 0 && animationInProgress == false && jackTimer > JACK_DELAY) {
 				if (player2Deck.getCardAt(0) == null) {
 					trace("Error: Null Card"); 
@@ -184,17 +160,15 @@
 				var cardPlayed = player2Deck.removeCard(); 
 				deck.addCard(cardPlayed); 
 				currentCard = cardPlayed; 
-				cardPlayed = cardPlayed.getCardMC();  // TODO: This line causes a bug occasionally. Why? 
+				cardPlayed = cardPlayed.getCardMC();
 				cardsLayer.addChild(cardPlayed); 
 				cardPlayed.x = stage.stageWidth / 2; 
 				cardPlayed.y = (stage.stageHeight / 2) - 50; 
 				cardPlayed.rotation = Math.random() * -5; 
-				TweenLite.to(cardPlayed, 1, {y:"+=50"});
+				AnimationManager.layCardUp(cardPlayed); 
 				p2Progress.width -= progressWidth; 
-				p2Progress.x = stage.stageWidth - p2Progress.width; 
 				if (deck.getLength() > 10 && deck.getCardAt(0).getCardMC().stage) {
 					cardsLayer.removeChild(deck.getCardAt(0).getCardMC());
-					//trace("card removed"); 
 				}
 				removeCard(); 
 				// If this is a jack, set delay timer
@@ -203,13 +177,11 @@
 				}
 				// Check if this is player2's last card (player1 wins) 
 				if (player1Turn == false && player2Deck.getLength() == 0) {
-					//trace("Player 1 wins!"); 
 					p2Progress.alpha = 0; 
 					if (currentCard.getValue() == 11) {
 						trace("Last jack!"); 
 						p2Deck.alpha = 0; 
 						yourTurn(2); // keep turn on player 2 so someone must take the jack 
-						// TODO: get deck to go away 
 					} else {
 						winner(1); 
 					}
@@ -221,8 +193,8 @@
 		}
 		
 		/*
-		*Determines whose turn it is. 
-		*/ 
+		 * Determines whose turn it is. 
+		 */ 
 		function yourTurn(player:int) :void {
 			if (player == 1) {
 				player1Turn = true; 
@@ -236,8 +208,8 @@
 		}
 		
 		/*
-		* Ends the game when there is a winner. 
-		*/ 
+		 * Ends the game when there is a winner. 
+		 */ 
 		function winner(player:Number) :void {
 			addChild(winText); 
 			winText.x = stage.stageWidth / 2; 
@@ -255,13 +227,15 @@
 				}
 			}
 			
-			addChild(menuButton); 
-			menuButton.x = stage.stageWidth / 4; 
-			menuButton.y = stage.stageHeight / 2; 
-			menuButton.addEventListener(TouchEvent.TOUCH_BEGIN, menu); 
+			addChild(helpButton); 
+			helpButton.x = stage.stageWidth / 4; 
+			helpButton.y = stage.stageHeight / 2;
+			AnimationManager.ZoomIn(helpButton); 
+			helpButton.addEventListener(TouchEvent.TOUCH_BEGIN, menu); 
 			addChild(rematchButton); 
 			rematchButton.x = 3 * (stage.stageWidth / 4); 
 			rematchButton.y = stage.stageHeight / 2; 
+			AnimationManager.ZoomIn(rematchButton);
 			rematchButton.addEventListener(TouchEvent.TOUCH_BEGIN, rematch); 
 		}
 		
@@ -280,8 +254,8 @@
 		///////////////////////////////
 		
 		/*
-		* Splits the deck into two equal decks. 
-		*/
+		 * Splits the deck into two equal decks. 
+		 */
 		private function splitDeck() :void {
 			var deck1:Boolean = true; 
 			
@@ -300,10 +274,10 @@
 		}
 		
 		/*
-		* Removes the graphic of the card at the 
-		* bottom of the deck if there are more than 
-		* ten cards.
-		*/ 
+		 * Removes the graphic of the card at the 
+		 * bottom of the deck if there are more than 
+		 * ten cards.
+		 */ 
 		function removeCard() :void {
 			if (deck.getLength() > 5) {
 				var found:Boolean; 
@@ -319,6 +293,9 @@
 			}
 		}
 		
+		/*
+		 *  Makes the deck and progress bar visible for the specified player. 
+		 */ 
 		function makeVisible(player:int) {
 			if (player == 1) {
 				p1Deck.alpha = 100; 
@@ -330,31 +307,29 @@
 		}
 		
 		/*
-		*  Destroys all instances of cards displayed onscreen and adds those cards to 
-		*  the respective player's deck. 
-		*/ 
+		 *  Destroys all instances of cards displayed onscreen and adds those cards to 
+		 *  the respective player's deck. 
+		 */ 
 		function destroyEverything(deckSize:int, cardsMoved:int, player:int) {
 			//trace("EXTERMINATE"); 
 			//trace(deckSize, cardsMoved); 
 			makeVisible(player); 
 			if (deckSize == cardsMoved) {
-				for (var j:int; j < deckSize; j++) {
-					if (deck.getCardAt(0) != null) {
+				for (var j:int = deckSize; j > 0; j--) {
+					var curCard:Card = deck.getCardAt(j-1); 
+					if (curCard != null) {
 						if (player == 1) {
-							player1Deck.addCard(deck.getCardAt(0)); 
+							player1Deck.addCard(curCard); 
 						} else {
-							player2Deck.addCard(deck.getCardAt(0)); 
+							player2Deck.addCard(curCard); 
 						}
-						if (deck.getCardAt(0).getCardMC().stage) {
-							cardsLayer.removeChild(deck.getCardAt(0).getCardMC());
+						if (curCard.getCardMC().stage) {
+							cardsLayer.removeChild(curCard.getCardMC());
 						}
 					}
 					deck.removeCard(); 
 				}
-// Moved here from the tap function so it gets checked after the animation - make sure this is a good idea
-// TODO: This works but get the deck to go away once the card is laid down
 				if (player2Deck.getLength() <= 1) {
-					//trace("player 1 wins!"); 
 					winner(1); 
 				}
 				if (player1Deck.getLength() <= 1) {
@@ -375,9 +350,9 @@
 		///////////////////////////////////////////////
 		
 		/*
-		* Sets up the main stage at the
-		* beginning of the game. 
-		*/ 
+		 * Sets up the main stage at the
+		 * beginning of the game. 
+		 */ 
 		function setUpStage(e:Event) :void {
 			removeEventListener(Event.ADDED_TO_STAGE, setUpStage);			
 			
@@ -402,7 +377,8 @@
 			
 			touchLayer.addChild(p2Progress); 
 			p2Progress.width = stage.stageWidth / 2; 
-			p2Progress.x = stage.stageWidth - p2Progress.width; 
+			p2Progress.x = stage.stageWidth;
+			p2Progress.y = 0;
 			
 			progressWidth = p1Progress.width / 26;
 			
@@ -426,18 +402,11 @@
 			p1Text.gotoAndStop(2); 
 			
 			touchLayer.addChild(p2Text); 
-			
-			//touchLayer.addChild(miniMen1); 
-			//miniMen1.x = stage.stageWidth / 4; 
-			//miniMen1.y = stage.stageHeight / 40; 
-			
-			//touchLayer.addChild(miniMen2); 
-			//miniMen2.x = 1; 
 		}
 
 		/*
-		* Cleans up event listeners 
-		*/ 
+		 * Cleans up event listeners 
+		 */ 
 		public function clear():void {
 			p1Deck.removeEventListener(TouchEvent.TOUCH_BEGIN, player1);
 			p2Deck.removeEventListener(TouchEvent.TOUCH_TAP, player2); 
